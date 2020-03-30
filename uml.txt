@@ -1,0 +1,24 @@
+@startuml
+!pragma graphviz_dot jdot
+Hospital *-- Doctor
+Hospital *-- Nurse
+
+class Hospital {
+  name:String
+  id:String
+  __init__()
+  __str__()
+}
+
+class Doctor {
+  salary:Integer
+  annual_pay()
+  calculate_payroll()
+}
+
+class Nurse {
+  salary:Integer
+  annual_pay()
+  calculate_payroll()
+}
+@enduml

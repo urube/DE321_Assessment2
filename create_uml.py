@@ -33,7 +33,7 @@ def main():
         sub_call(ar)
         print('uml done')
     except PermissionError:
-        print("you don't Hve valid permissions to create this file")
+        print("you don't have valid permissions to create this file")
     except FileNotFoundError:
         print("cannot find file at " + ar)
 
