@@ -27,10 +27,10 @@ To use the python3 program run codes from **"command.py"** and follow the prompt
 ![alt text](https://github.com/urube/DE321_Assessment2/blob/master/Documentation/codes_andaz's/uml.png)
 
 ## Coders
-```
+
 @djv0049
 @urube
 
-```
+
 
 
