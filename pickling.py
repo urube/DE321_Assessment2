@@ -1,5 +1,7 @@
 """
 Using pickle for object-persistence.
+to-do: Make cmd robust for when users enter unknown codes
+validate data: checking is source file exists or is python or correct
 """
 import pickle
 import os
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     un_pickle_it()
 
 
-class Pickling:  # pickle by py file
+class Pickling:  # pickle whole .py file
     def __init__(self, to_pickle, file_name):
         self.to_pickle = to_pickle
         self.file_name = file_name
@@ -52,9 +54,15 @@ class Pickling:  # pickle by py file
 
     def validate_file(self):
         try:
-            with open(self.file_name) as file:
-                file.close()
-                return True
+            if os.path.exists(self.file_name):
+                if ".pickle" in self.file_name[-7:]:
+                    with open(self.file_name) as file:
+                        file.close()
+                        return True
+                else:
+                    print("Incorrect file format.")
+            else:
+                print("File not fount")
         except FileNotFoundError as err:
             print(f'The error is, {err}')
 
@@ -68,4 +76,11 @@ class Pickling:  # pickle by py file
             a_file.close()
     
     def delete_it(self):
-        os.remove(self.file_name)
+        if os.path.exists(self.file_name):
+            if ".pickle" in self.file_name[-7:]:
+                os.remove(self.file_name)
+                print("Pickle file deleted.")
+            else:
+                print("Incorrect file format.")
+        else:
+            print("File not fount")

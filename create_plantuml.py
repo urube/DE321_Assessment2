@@ -1,27 +1,51 @@
+"""
+Create diagram from dot file using Plantuml
+to-do: <option> -filename "%filename%" is not working in plantuml. Cannot give name to png file.
+validate data: checking is source file exists or is python or correct
+"""
 import os
-from pathlib import Path
 
 
 class DiagramCreator:
     def __init__(self, file_name):
         self.file_name = file_name
 
-    def validate_file(self):
+    def validate_file(self):  # returns true if the file exits and is .txt
         try:
-            with open(self.file_name) as file:
-                file.close()
-                return True
+            if os.path.exists(self.file_name):
+                if ".txt" in self.file_name[-4:]:
+                    with open(self.file_name) as file:
+                        file.close()
+                        return True
+                else:
+                    print("incorrect file format!")
+            else:
+                print("File not fount")
         except FileNotFoundError as err:
             print(f'The error is, {err}')
 
-    def create_diagram(self):
-        if self.validate_file():
+    def create_diagram(self):  # create dot txt file into png using Plantuml
+        if self.validate_file():  # deals with file directory and should work for any os
             java = "java -jar plantuml.jar "
-            destination = Path("./Documentation/")
-            os.system(f'{java} -o {destination} {self.file_name}')
-    
+            script_dir = os.getcwd()
+            directory = "DE321_assignment_2-master"
+            file_location = (script_dir + "\\" or "//" + directory + "\\" or "//")
+            destination = (script_dir + "\\" or "//" + directory)
+            os.system(f'{java} -o {destination} {file_location}{self.file_name}')
+
     def load_dot_file(self):
-        print(self.file_name.read_text())
-
-
-# print(DiagramCreator("a").load_dot_file())
+        if self.validate_file():
+            script_dir = os.getcwd()
+            file_to_open = (script_dir + "\\" + self.file_name)
+            f = open(file_to_open)
+            print(f.read())
+       
+    def delete_png(self):
+        if os.path.exists(self.file_name):
+            if ".png" in self.file_name[-4:]:
+                os.remove(self.file_name)
+                print("Png file deleted.")
+            else:
+                print("Incorrect file format.")
+        else:
+            print("File not fount")

@@ -4,8 +4,6 @@ import sqlite3  # database interactions
 import doctest  # not doing much yet
 from os import path
 from shlex import split
-
-
 # get path to config file
 
 # read config file
@@ -16,9 +14,17 @@ from shlex import split
 # create database
 
 def connect(db=None):
-    if db is None:
+    '''
+    >>> type(connect())
+    <class 'sqlite3.Connection'>
+
+    '''
+    connection = None
+    #  assert(db is None)
+    if (db is None):
         js = json_extract()
         db = js['db']
+
     try:
         connection = sqlite3.connect(db)
     except():
@@ -27,7 +33,7 @@ def connect(db=None):
 
 
 def json_extract(component='db_commands'):
-    """
+    '''
     make sure that the method gets a dictionary from json by default
     >>> type(json_extract())
     <class 'dict'>
@@ -35,24 +41,47 @@ def json_extract(component='db_commands'):
     >>> json_extract('json_test')
     {'item_one': 'one', 'item_two': 'two'}
 
-    """
+    >>> json_extract('bad_data')
+    bad_data does not exist in config file
+    '''
 
-    with open('config.json') as config:
-        result = json.load(config)
-        result = result[component]
+    result = None
+    try:
+        with open('config.json') as config:
+            whole_file = json.load(config)
+            result = whole_file[component]
+    except(KeyError):
+        print(component + " does not exist in config file")
     return result
 
 
 # uses regex to read a dot file, and creates tables from data
 def make_tables(connection):
+    '''
+    >>> make_tables()
+    Traceback (most recent call last):
+      File "%\\doctest.py", line 1329, in __run
+        compileflags, 1), test.globs)
+      File "<doctest __main__.make_tables[0]>", line 1, in <module>
+        make_tables()
+    TypeError: make_tables() missing 1 required positional argument:\
+ 'connection'
+
+
+    '''
     dot_file = ''
     classes_data = []
-
     try:
         paths = json_extract('paths')
         dot_file = paths['dot_file']
-    except KeyError:
-        print("this object doesn't exist in the config file")
+    except(KeyError):
+        print(" the dot file doesn't exist in the config file")
+        return
+    except(TypeError):
+        print("there is an issue with the config file")
+        print("the paths segment cannot be found")
+        return
+
     try:  # using regex to read .dot file
         with open(dot_file) as d:
             from re import findall
@@ -61,58 +90,76 @@ def make_tables(connection):
                 splited = split("\|", x)  # [0] ends with class name,
                 # [1] has attributes separated by \\l
                 # [2] has functions separated by \\l
-                if splited.__len__() > 2:
+                if(splited.__len__() > 2):
                     class_name = findall(r'\w*$', splited[0])[0]
-                    attributes = findall(r'(.*?)\\\\l', splited[1])
+                    attributes = findall('(.*?)\\\\l', splited[1])
                     methods = findall('(.*?)\\\\l', splited[2])
                     temp_list = []
                     temp_list.append(class_name)
                     temp_list.append(attributes)
                     temp_list.append(methods)
                     classes_data.append(temp_list)
-                    ({'name': class_name, 'atts': attributes, 'defs': methods})
-
-    except FileNotFoundError:
+                    (
+                        {'name': class_name, 'atts': attributes,
+                         'defs': methods})
+    except(FileNotFoundError):
         print("this file does not exist")
+        return
     command = json_extract('db_commands')
     table_exists = False
     try:
+        assert command['delete_table'] == "DROP TABLE IF EXISTS "
         connetion.execute(command['delete_table'] + command['table_name'])
         table_exists = False
-    except KeyError:
-        print('the config file has an error at "db_commands"["delete_table"]')
+    except(KeyError):
+        print(
+            'the config file has an error at "db_commands"["delete_table"] ')
+        print('or [table_name]')
+    except(AssertionError):
+        print("delete command has been changed, " +
+              command['delete_table'] + " should be  DROP TABLE IF EXISTS ")
     try:
         connection.execute(command['create_table'])
         table_exists = True
-    except KeyError:
+    except(KeyError):
         print('the config file has an error at "db_commands"["create_table"]')
-    except sqlite3.OperationalError:
-        print('this table already exists, try deleting the table. this will be')
+    except(sqlite3.OperationalError):
+        print('this table already exists, try deleting the table')
         print('due to an inconsistency in the config file')
 
-    if table_exists:
+    if(table_exists):
         add_data(classes_data)
 
 
 def add_data(classes_data):
+    '''
+    >>> add_data()
+    Traceback (most recent call last):
+      File "%\\doctest.py", line 1329, in __run
+        compileflags, 1), test.globs)
+      File "<doctest __main__.add_data[0]>", line 1, in <module>
+        add_data()
+    TypeError: add_data() missing 1 required positional argument: \
+'classes_data'
+    '''
+
     command = json_extract()
     for obj in classes_data:
         att_str = []
+        # first, get data from dot file
         for section in obj:
-            if type(section) != str:
+            if(type(section) != str):
                 attribute_list = ""
                 for individual_attribute in section:
                     attribute_list += individual_attribute + " "
                 att_str.append(attribute_list)
             else:
                 att_str.append(section.__str__())
-        print(att_str)
-        # double checking that there are 3 values in the object
-        if att_str.__len__() == 3:
+        # then, add to database
+        if(att_str.__len__() == 3):
             inputcommand = command['insert'] + command['table_name'] + \
-                           'Values(" ' + att_str[0] + '","' + \
-                           att_str[1] + '"," ' + att_str[2] + '"); '
-            print(inputcommand)
+                'Values(" ' + att_str[0] + '","' + \
+                att_str[1] + '"," ' + att_str[2] + '"); '
             connetion.execute(inputcommand)
 
 
@@ -123,23 +170,22 @@ def select_from_sql(connection):
         cursor = connection.cursor()
         command = json_extract()
         cursor.execute(command['select'] + command['table_name'])
-        print(cursor.fetchall())
-    except():
-        print("last error")
-    print('done')
-    # somehow format the data from database and .dot file into a medium format
-
-    # somehow validate the data extracted from the database
-    # is the same as the data in the classes.dot file
-
-    # tell the cmd that the task is done
-    # hard coded values to be fixed with variables and assert/try-catch
-    # statements to make sure value is correct
+        result = cursor.fetchall()
+    except:
+        print("there is an error selecting from the database")
+        result = []
+    return result
 
 
 if __name__ == "__main__":
     doctest.testmod()
     connetion = connect()
     make_tables(connetion)
-    select_from_sql(connetion)
-    print('database done')
+    data = select_from_sql(connetion)
+    if(data.__len__() > 1):
+        print("the data in the database is :\n")
+        print(data)
+        print('\ndatabase complete')
+    else:
+        print(data)
+        print("the database is empty")

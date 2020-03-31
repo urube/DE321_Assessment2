@@ -1,7 +1,5 @@
 """
 cli is the main user interface
-to-do: Make cmd robust for when users enter unknown codes
-validate data: checking is source file is python or is classes are correct
 """
 from cmd import Cmd
 
@@ -65,14 +63,14 @@ class CommandLineInterface(Cmd):
         """
         try:
             from pickling import Pickling
-            Pickling('output.pickle', arg).unpickle_it()
-            print('The pickled file has been un-pickled')
+            Pickling('', arg).unpickle_it()
+            print('The pickled file has been un-pickled.')
         except FileNotFoundError as e:
             print(e)
         except():
             print("Error!!")
 
-    def do_pickle_delete(self, arg):
+    def do_delete_pickle(self, arg):
         """
         Delete the pickled file
         Syntax:  pickle_delete [file name]
@@ -80,7 +78,7 @@ class CommandLineInterface(Cmd):
         """
         try:
             from pickling import Pickling
-            Pickling('exp', arg).delete_it()
+            Pickling('', arg).delete_it()
         except FileNotFoundError as err:
             print(err)
 
@@ -98,9 +96,9 @@ class CommandLineInterface(Cmd):
         except():
             print("Error!!")
 
-    def do_create_uml(self, arg):
+    def do_create_pyreverse_uml(self, arg):  # Daniel's uml diagram
         """
-        Create uml diagram from dot file
+        Create uml diagram from dot file using Pyreverse
         Syntax:
         """
         try:
@@ -111,7 +109,7 @@ class CommandLineInterface(Cmd):
         except():
             print("Error!!")
 
-    def do_load(self, name):
+    def do_load_database(self, name):
         """
         load the DOT file of uml diagram
         Syntax: load
@@ -124,7 +122,64 @@ class CommandLineInterface(Cmd):
         except():
             print('Loading failed')
 
-    def do_exit(self, arg):
+    def do_create_plantuml(self, arg):
+        """
+        Create uml diagram from dot file using Plantuml
+        Syntax:
+        """
+        try:
+            from create_plantuml import DiagramCreator
+            DiagramCreator(arg).create_diagram()
+            print("Png file created.")
+        except ImportError as e:
+            print(e)
+        except():
+            print('Error!!')
+
+    def do_dot_load(self, arg):
+        """
+        Load txt dot file
+        syntax: dot_load [file name].txt
+        """
+        try:
+            from create_plantuml import DiagramCreator
+            DiagramCreator(arg).load_dot_file()
+            print("Loading complete.")
+        except ImportError as e:
+            print(e)
+        except():
+            print("loading failed!!")
+
+    def do_delete_png(self, arg):
+        """
+        delete png file created using plantuml
+        Syntax: delete_png [file name]
+        """
+        try:
+            from create_plantuml import DiagramCreator
+            DiagramCreator(arg).delete_png()
+        except ImportError as e:
+            print(e)
+        except():
+            print("Delete failed!!")
+
+    def do_extract_data(self, arg):
+        """
+        Extracts data from .py file to find the classes and function.
+        Syntax: extract_data [file name].py
+        """
+        try:
+            from extract_data import PrintClass, PrintFunc
+            c = PrintClass(arg)
+            c.reader()
+            f = PrintFunc(arg)
+            f.reader()
+        except ImportError as e:
+            print(e)
+        except():
+            print("Error!!")
+
+    def do_exit(self, line):
         """
         Stop the program
         syntax: exit
