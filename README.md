@@ -17,5 +17,5 @@ To use the python3 program run codes from **"command.py"** and follow the prompt
 ```
 
 ### How do code create Uml diagram?
-* Pylint, Pyreverse: Creates dot file, Graphviz generates Uml diagram from dot file.
-* PlantUml: I couldn't automate the python to dot file for Plantuml. So, i manually wrote txt dot file which Plantuml creates into Uml diagram.
+* **Pylint, Pyreverse:** Creates dot file, Graphviz generates Uml diagram from dot file.
+* **PlantUml:** I couldn't automate the python to dot file for Plantuml. So, i manually wrote txt dot file which Plantuml creates into Uml diagram.
