@@ -30,7 +30,7 @@ To use the python3 program run codes from **"command.py"** and follow the prompt
 
 **@djv0049,**
 **@urube**
-This is a work done by students for assessement. 
+This is a work done by students for assessment. 
 
 
 
